@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatable" context="IE-edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home | Schoology</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="icon" href="https://asset-cdn.schoology.com/sites/all/themes/schoology_theme/favicon.ico">
+    <script src="main.js"></script>
+    <script src="game.js"></script>
+  </head>
+  <body>
+    
+<!--CLICK TO START SCREEN:-->
+    <div class="clickME" id="selfDestruct1" onclick="launchFullScreen(document.documentElement);document.getElementById('selfDestruct3').remove();document.getElementById('selfDestruct4').remove();document.getElementById('selfDestruct1').remove();"><h1>
+      Click to Fullscreen
+      </h1></div>
+    <div class="clickME1BETATEXT" id="selfDestruct4">
+      <a href="issues.html">This project is still in alpha, click here for full bug list</a>
+    </div>
+    <div class="clickME1BUTTON" id="selfDestruct3">
+      <button onclick="document.getElementById('selfDestruct1').remove();document.getElementById('selfDestruct4').remove();document.getElementById('selfDestruct3').remove();">
+      Continue w/o fullscreen (BUGGY)
+      </button></div>
+    <div class="clickME2" id="selfDestruct2" onclick="loadGame();document.getElementById('selfDestruct2').remove();">
+      <h1>
+        Click to load game
+      </h1>
+    </div>
+<!--  OMG IT ENDS HERE!     -->
+    
+<!--  ITS A SECRET OwO    -->
+    <!--Press ` -->
+<!--   Not really........ i mean, you can see it in plain text   -->
+    <button id="startButton" onclick="loadGame();document.getElementById('startButton').remove();" hidden>
+      Start Game
+    </button>
+    <div id="canvasHolder">
+      <canvas id="gameHolder"></canvas>
+    </div>
+    
+    <div id="mediaHolder">
+      <audio id="menuAudio" src="https://cdn.glitch.global/5ef2fe55-51fd-48d0-8627-9bf44bad65e7/584131_Geometry-Dash-Menu-Theme.mp3?v=1747789917468" hidden></audio>
+      
+    </div>
+    
+<!--      
+
+    once apon a time, the developer used a <script> element to start the game with an onload event listener
+    BUT THEN out of thin air, the evil gods of javascript came down to earth to whisper to all web developers....
+    "Javascript is the dumbest coding language"
+    Yet nobody listened... this caused the creation of a usless sleep function.
+    Eventually the developer learned that some stupid functions don't work how the developer wants it to
+    In the end, the developer decided to add multiple walls of ugly af looking BS for the user to click on
+    This makes the developer happy and the player confused
+    The end
+
+-->
+    <script>
+      // window.addEventListener('load',function(){
+      //   loadGame();
+      // });
+    </script>
+    
+  </body>
+</html>

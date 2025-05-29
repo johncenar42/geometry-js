@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Schoology | Home</title>
+    
+    <script>
+    
+    console.log("boo");
+      var setGamemode = -1;
+      function toggleSetGamemode () {
+        setGamemode = setGamemode*-1;
+        if (setGamemode ==1){
+          document.getElementById("setGamemodeText").hidden = false;
+          document.getElementById("gamemode").hidden = false;
+          document.getElementById("setGamemodeDivider").hidden = false;
+        }
+        else{
+          document.getElementById("setGamemodeText").hidden = true;
+          document.getElementById("gamemode").hidden = true;
+          document.getElementById("setGamemodeDivider").hidden = true;
+        }
+      }
+      
+      var setGravity = -1;
+      function toggleGravity () {
+        setGravity = setGravity*-1;
+        if (setGravity ==1){
+          document.getElementById("setGravityText").hidden = false;
+          document.getElementById("gravity").hidden = false;
+          document.getElementById("setGravityDivider").hidden = false;
+        }
+        else{
+          document.getElementById("setGravityText").hidden = true;
+          document.getElementById("gravity").hidden = true;
+          document.getElementById("setGravityDivider").hidden = true;
+        }
+      }
+      
+      function submitData(){
+        var data = {};
+        if (setGamemode == 1){
+          data.gameMode = document.getElementById("gamemode").value;
+        }
+        if (setGravity ==1){
+          data.gravity = document.getElementById("gravity").value;
+        }
+        if (data.hasOwnProperty("gameMode") || data.hasOwnProperty("gravity")){
+          window.opener.importDevScreenData(data);
+          document.getElementById("statusText").style="color:#00CC00;";
+          document.getElementById("statusText").innerText="Sucsess!";
+          document.getElementById("statusText").hidden=false;
+          setTimeout(()=>{document.getElementById("statusText").hidden=true;},2500);
+        }
+        else{
+          document.getElementById("statusText").style="color:#CC0000;";
+          document.getElementById("statusText").innerText="Please provide an input";
+          document.getElementById("statusText").hidden=false;
+          setTimeout(()=>{document.getElementById("statusText").hidden=true;},2500);
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <input type="checkbox" id="asdfghjkl" onclick="toggleSetGamemode();"><label onclick="if(document.getElementById('asdfghjkl').checked){document.getElementById('asdfghjkl').checked = false;}else{document.getElementById('asdfghjkl').checked = true;}toggleSetGamemode();">Change Gamemode</label>
+    <input type="checkbox" id="asdfghjkll" onclick="toggleGravity();"><label onclick="if(document.getElementById('asdfghjkll').checked){document.getElementById('asdfghjkll').checked = false;}else{document.getElementById('asdfghjkll').checked = true;}toggleGravity();">Change Gravity</label>
+    <hr>
+    
+    <label id="setGamemodeText" hidden>Set Gamemode:</label>
+    <select id="gamemode" hidden>
+      <option value="cube">Cube</option>
+      <option value="ship">Ship</option>
+      <option value="ball">Ball</option>
+      <option value="ufo">UFO</option>
+      <option value="wave">Wave</option>
+      <option value="robot">Robot</option>
+      <option value="spider">Spider</option>
+      <option value="swing">Swing</option>
+    </select>
+    <hr id="setGamemodeDivider" hidden>
+    
+    <label id="setGravityText" hidden>Set Gravity:</label>
+    <select id="gravity" hidden>
+      <option value="1">Normal</option>
+      <option value="-1">Flipped</option>
+    </select>
+    <hr id="setGravityDivider" hidden>
+    
+    <button onclick="submitData();">
+      Push
+    </button>
+    <br>
+    <h3 id="statusText"></h3>
+  </body>
+</html>

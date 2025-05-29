@@ -1,0 +1,58 @@
+ <style>
+  .class1{
+    opacity:1;
+    background-color:#cccccc;
+    position:fixed;
+    width:100%;
+    height:80%;
+    top:0px;
+    left:0px;
+    z-index:1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor:pointer;
+  }
+  .class2{
+    opacity:1;
+    background-color:#cccccc;
+    position:fixed;
+    width:100%;
+    height:20%;
+    bottom:0px;
+    right:0px;
+    z-index:1001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor:pointer;
+  }
+</style>
+
+<script>
+var count = 0;
+setInterval(function(){
+    count++;
+    var dots = new Array(count % 5).join('.');
+    document.getElementById('redirectingText').innerHTML = "Redirecting" + dots;
+  }, 500);
+</script>
+<script>
+function redirect(){
+  setTimeout(function() {
+  window.location.href = "index.html";
+}, 5000);
+}
+  redirect();
+</script>
+<div class="class1">
+  <h1>
+    NOT FINISHED
+  </h1>
+</div>
+<div class="class2">
+  <h3 id="redirectingText">
+    Redirecting
+  </h3>
+</div>
+

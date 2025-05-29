@@ -1,0 +1,100 @@
+<p>tis a broken website, get tf out</p>
+<label>Audio file:</label>
+<input type="file" id="audio-file" accept="audio/*">
+<audio id="audio-player" controls></audio>
+<script>
+const audioFile = document.getElementById('audio-file');
+const audioPlayer = document.getElementById('audio-player');
+
+audioFile.addEventListener('change', (event) => {
+  const file = event.target.files[0];
+  const objectURL = URL.createObjectURL(file);
+  audioPlayer.src = objectURL;
+  audioPlayer.play();
+  audioPlayer.loop = true;
+});
+</script>
+
+
+<script>
+async function getJSONFromURL(url) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+      console.debug("TwT");console.debug("TwT");console.debug("TwT");console.debug("TwT");
+    }
+    const json = await response.json();
+    return json;
+  } catch (error) {
+    console.error("Could not fetch or parse the JSON:", error);
+    console.debug("TwT");
+    return null;
+  }
+}
+
+getJSONFromURL("JSONFILETESTING.json")
+  .then(data => {
+    if (data) {
+      console.log(`fetched \n${data}`);
+      console.debug("UwU");console.debug("UwU");console.debug("UwU");console.debug("UwU");console.debug("UwU");console.debug("UwU");console.debug("UwU");console.debug("UwU");
+    }
+  });
+
+</script>
+
+<!--nobody is allowed to look at my code ok...........
+
+
+
+
+
+
+OK??
+
+
+
+
+
+
+
+ya im being dumb
+
+
+
+
+
+
+
+
+and im tired
+
+
+
+
+
+
+
+
+ima leave this in here tho
+
+
+
+
+
+
+
+
+>w<
+
+
+
+
+
+LINE 100
+
+|
+|
+|
+↓-->
+<p hidden>&gt;w&lt;</p>
