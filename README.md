@@ -8,7 +8,7 @@ therefore the only logical conclusion is to remake it in VANILLA JS
 
 
 
-
+it looks like schoology b/c my school was blocking it -_-
 
 
 
@@ -30,3 +30,5 @@ NOTE: this project ,if viewed close to release, will be complete dogwater - i am
 
 
 ## I PRESENT TO YOU... GEOMETRY DASH IN JAVASCRIPT
+
+https://johncenar42.github.io/geometry-js/
