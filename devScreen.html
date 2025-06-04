@@ -36,6 +36,21 @@
         }
       }
       
+      var setDebug = -1;
+      function toggleDebug () {
+        setDebug = setDebug*-1;
+        if (setDebug ==1){
+          document.getElementById("showDebugText").hidden = false;
+          document.getElementById("showDebug").hidden = false;
+          document.getElementById("showDebugDivider").hidden = false;
+        }
+        else{
+          document.getElementById("showDebugText").hidden = true;
+          document.getElementById("showDebug").hidden = true;
+          document.getElementById("showDebugDivider").hidden = true;
+        }
+      }
+      
       function submitData(){
         var data = {};
         if (setGamemode == 1){
@@ -44,7 +59,17 @@
         if (setGravity ==1){
           data.gravity = document.getElementById("gravity").value;
         }
-        if (data.hasOwnProperty("gameMode") || data.hasOwnProperty("gravity")){
+        if (setDebug ==1){
+          if (document.getElementById("showDebug").value == "true"){
+            data.showDebug = true;
+          }
+          else{if (document.getElementById("showDebug").value == "false"){
+            data.showDebug = false;
+          }
+               else{alert("showDebug err");}
+          }
+        }
+        if (data.hasOwnProperty("gameMode") || data.hasOwnProperty("gravity") ||data.hasOwnProperty("showDebug")){
           window.opener.importDevScreenData(data);
           document.getElementById("statusText").style="color:#00CC00;";
           document.getElementById("statusText").innerText="Sucsess!";
@@ -63,6 +88,7 @@
   <body>
     <input type="checkbox" id="asdfghjkl" onclick="toggleSetGamemode();"><label onclick="if(document.getElementById('asdfghjkl').checked){document.getElementById('asdfghjkl').checked = false;}else{document.getElementById('asdfghjkl').checked = true;}toggleSetGamemode();">Change Gamemode</label>
     <input type="checkbox" id="asdfghjkll" onclick="toggleGravity();"><label onclick="if(document.getElementById('asdfghjkll').checked){document.getElementById('asdfghjkll').checked = false;}else{document.getElementById('asdfghjkll').checked = true;}toggleGravity();">Change Gravity</label>
+    <input type="checkbox" id="asdfghjklla" onclick="toggleDebug();"><label onclick="if(document.getElementById('asdfghjklla').checked){document.getElementById('asdfghjklla').checked = false;}else{document.getElementById('asdfghjklla').checked = true;}toggleDebug();">Change Debug State</label>
     <hr>
     
     <label id="setGamemodeText" hidden>Set Gamemode:</label>
@@ -84,6 +110,13 @@
       <option value="-1">Flipped</option>
     </select>
     <hr id="setGravityDivider" hidden>
+    
+    <label id="showDebugText" hidden>ShowDebug:</label>
+    <select id="showDebug" hidden>
+      <option value="true">True</option>
+      <option value="false">False</option>
+    </select>
+    <hr id="showDebugDivider" hidden>
     
     <button onclick="submitData();">
       Push

@@ -1,0 +1,40 @@
+{
+  
+  "a":2,
+  "song":{
+    "url":"https://cdn.glitch.global/5ef2fe55-51fd-48d0-8627-9bf44bad65e7/INFAMOUS%20-%20Instrumental.mp3?v=1749013743818",
+    "elementId":"bobsURMOM",
+    "jsonName":"bobsURMOMsSONG"
+  },
+  "events":[
+    {
+      "frame":1,"type":"gameMode","value":"cube"
+    },
+    {
+      "frame":1,"type":"speed","value":5
+    },
+    {
+      "frame":100,"type":"speed","value":20
+    },
+    {
+      "frame":200,"type":"gameMode","value":"ship"
+    },
+    {
+      "frame":450,"type":"gameMode","value":"spider"
+    }
+  ],
+  "squares":[
+    {
+      "frame":50,"y":700,"scale":3
+    }
+  ],
+  "slopes":{},
+  "obsticles":[
+    {
+      "frame":100,"y":500,"w":50,"h":50
+    },
+    {
+      "frame":150,"y":700,"w":50,"h":50
+    }
+  ]
+}

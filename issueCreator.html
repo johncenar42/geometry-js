@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Issue Creator (Useless for non-devs)</title>
+  </head>
+  <body>
+    <a href="./index.html">If you accidently got here, click me</a>
+    <br>
+    <hr>
+    <label>Json var name (this doesn't matter):</label><br>
+    <input type="text" id="randomName"><br><br>
+    <label>Name:</label><br>
+    <input type="text" id="name">
+    <br><br>
+    <label>Description:</label><br>
+    <textarea id="desc"></textarea>
+    <br><br>
+    <label>Id:</label><br>
+    <input type="text" id="idholder">
+    <br><br>
+    <button onclick="generateJSON();">
+      JSON Format
+    </button>
+    
+    <br><br>
+    <p>
+      Output:
+    </p>
+    <textarea id="output"></textarea>
+    
+    <script>
+    
+      function generateJSON () {
+        var json = {};
+        json.name = document.getElementById("name").value;
+        json.desc = document.getElementById("desc").value;
+        json.id = document.getElementById("idholder").value;
+        document.getElementById("output").innerText = `"${document.getElementById("randomName").value}":` + JSON.stringify(json);
+      }
+      
+    </script>
+  </body>
+</html>

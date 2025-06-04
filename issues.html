@@ -1,4 +1,4 @@
- <style>
+<!-- <style>
   .class1{
     opacity:1;
     background-color:#cccccc;
@@ -56,3 +56,112 @@ function redirect(){
   </h3>
 </div>
 
+ -->
+
+<style>
+
+  .issueDiv{
+    background-color:#7b8f96;
+    margin=1%;
+  }
+  .issueName{
+    color:#fff;
+  }
+  .issueDesc{
+    color:#ddd;
+  }
+  .issueId{
+    color:#333;
+  }
+  
+</style>
+
+<div id="issueHolder">
+  
+</div>
+
+<script>
+  
+  function createIssue(name, description, id, holderID, issueId) {
+    var isError = false;
+    var holderElement;
+    try {
+      holderElement = document.getElementById(holderID);
+    } catch (e) {
+      console.error(`Couldn't get holder element:\n${e}`);
+      isError = true;
+    }
+
+    if (!isError) {
+      const tempDiv = document.createElement('div');
+      tempDiv.className = "issueDiv"; 
+      tempDiv.id = `id${issueId}`; 
+
+      const tempName = document.createElement('h3');
+      tempName.innerText = name;
+      tempName.className = "issueName"; 
+
+      const tempDesc = document.createElement('p');
+      tempDesc.innerText = description;
+      tempDesc.className = "issueDesc"; 
+
+      const tempIssueId = document.createElement('p');
+      tempIssueId.innerText = id;
+      tempIssueId.className = "issueId"; 
+
+      holderElement.appendChild(tempDiv);
+
+      let tempElementHolder = document.getElementById(`id${issueId}`); 
+      tempElementHolder.appendChild(tempName);
+      tempElementHolder.appendChild(tempDesc);
+      tempElementHolder.appendChild(tempIssueId);
+    }
+  }
+  
+  var issuesJSON;
+  
+  async function getJSONFromURL(url) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const json = await response.json();
+      return json;
+    } catch (error) {
+      console.error("Could not fetch or parse the JSON:", error);
+      return null;
+    }
+  }
+  
+  getJSONFromURL("./issues.json")
+    .then(data => {
+      if (data) {
+        var tempIdNum = 0;
+        for (var i = 0; i < Object.keys(data).length; i++) {
+          var errors = false;
+
+          if (data[Object.keys(data)[i]]["name"] !== "" && data[Object.keys(data)[i]]["name"] != null) {
+            if (data[Object.keys(data)[i]]["desc"] !== "" && data[Object.keys(data)[i]]["desc"] != null) {
+              if (data[Object.keys(data)[i]]["id"] !== "" && data[Object.keys(data)[i]]["id"] != null) {
+                console.debug("no errors :)");
+              } else {
+                console.error(`Error, data[${data[Object.keys(data)[i]]}]["id"] is null`);
+                errors = true;
+              }
+            } else {
+              console.error(`Error, data[${data[Object.keys(data)[i]]}]["desc"] is null`);
+              errors = true;
+            }
+          } else {
+            console.error(`Error, data[${data[Object.keys(data)[i]]}]["name"] is null`);
+            errors = true;
+          }
+          if (!errors) {
+            createIssue(data[Object.keys(data)[i]]["name"], data[Object.keys(data)[i]]["desc"], data[Object.keys(data)[i]]["id"], "issueHolder", tempIdNum);
+            tempIdNum++;
+          }
+        }
+      }
+    });
+</script>

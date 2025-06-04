@@ -1,3 +1,14 @@
+// var newWindowInfo = null;
+
+// window.addEventListener("resize",(e)=>{
+//   newWindowInfo = {"width":document.getElementById("gameHolder").width,"height":document.getElementById("gameHolder").height};
+
+
+// });
+
+var debugVar1 = null;
+
+
 async function getJSONFromURL(url) {
   try {
     const response = await fetch(url);
@@ -6,11 +17,41 @@ async function getJSONFromURL(url) {
     }
     const json = await response.json();
     return json;
+    
   } catch (error) {
     console.error("Could not fetch or parse the JSON:", error);
     return null;
   }
 }
+
+function getVerticalOverlap(y1, h1, y2, h2) {
+  const top = Math.max(y1, y2);
+  const bottom = Math.min(y1 + h1, y2 + h2);
+  return Math.max(0, bottom - top); // returns 0 if there's no overlap
+}
+
+
+function isColiding(hb1, hb2) {
+  return (
+    (hb1.x < hb2.x + hb2.width &&
+     hb1.x + hb1.width > hb2.x &&
+     hb1.y < hb2.y + hb2.height &&
+     hb1.y + hb1.height > hb2.y) /*||*/
+     
+//     (hb2.x <= hb1.x + hb1.width &&
+//      hb2.x + hb2.width >= hb1.x &&
+//      hb2.y <= hb1.y + hb1.height &&
+//      hb2.y + hb2.height >= hb1.y)
+  );
+}
+
+// setTimeout(() => {
+//   alert(isColiding({ x: 10, y: 22, width: 50, height: 50 }, { x: 40, y: 50, width: 50, height: 50 }));
+// }, 2500);
+
+
+var showDebug = false;
+
 
 var levelJSON;
 getJSONFromURL("levelTest.json")
@@ -34,7 +75,7 @@ window.addEventListener("keydown",(k)=>{
           devScreenVisible = false;
   }
 }, 50);
-    }else{try{devWindow.focus();}catch(e){console.log(e)}}
+    }else{try{devWindow.focus();}catch(e){console.debug(e)}}
   }
 });
 
@@ -56,6 +97,8 @@ var audioElements = {"MenuMusic":"menuAudio"};
 var prevMusicVolume = 100; //
 
 var musicVolume = 100; //percent
+
+let prevAudioElementId = null;
 
 var currentLevelAudioElement = null;
 
@@ -80,6 +123,7 @@ function jsonContainsName(jsonObj,name){ // made this myself tho
 function toggleMenuMusic (/*play/pause*/p,/*BY DEFAULT (if null), TIMESTAMP = 0timeStamp*//* currently playing audio's element (if null or pause nothing happens with this)*/i){
   if (p == "play"){
     const menuAudio = document.getElementById(audioElements.MenuMusic);
+    prevAudioElementId = menuAudio;
     if (!i==null){try{i.pause}catch(e){console.error(e);}}
     ///*TIME STAMP IS TOO BUGGY RN*/ if (timeStamp == null || timeStamp == 0){menuAudio.currentTime = 0; timeStamp = true;}else{if(timeStamp.isInteger){menuAudio.currentTime = timeStamp; timeStamp = true;}else{console.error(`Menu audio playing failed: \n Timestamp of menu music was invalid (The value of 'timeStamp' was ${timeStamp})`);timeStamp = false;}}
     /*if(timeStamp){*/menuAudio.play();menuAudio.loop=true;/*}*/
@@ -145,9 +189,16 @@ function loadLvlAudio(audioLink,newElement/*create new element for new audio*/,r
 }
 
 function playAudio(elementID,time,loop){
+  try{
+    pauseAudio(prevAudioElementId);
+  }
+  catch(e){
+    console.error(`couldn't pause audio, error:\n${e}`);
+  }
   document.getElementById(elementID).play();
   document.getElementById(elementID).currentTime = time;
   document.getElementById(elementID).loop = loop;
+  prevAudioElementId = elementID;
 }
 
 function pauseAudio(elementId){
@@ -227,7 +278,7 @@ function loadGame() {
           this.game.keys.push(keyEvent.key);
         }
 
-        console.log(`Key pressed "${keyEvent.key}"`);
+        console.debug(`Key pressed "${keyEvent.key}"`);
       });
 
       window.addEventListener("keyup", (keyEvent) => {
@@ -238,7 +289,7 @@ function loadGame() {
           this.game.keys.splice(this.game.keys.indexOf(keyEvent.key), 1); //remove 1 element from the index of the key event key
         }
 
-        console.log(`Key released "${keyEvent.key}"`);
+        console.debug(`Key released "${keyEvent.key}"`);
       });
       /*
       
@@ -254,7 +305,7 @@ function loadGame() {
             var rect = {x:(tempcanvas.width/2)-100,y:tempcanvas.height/2,width:200,height:200} //rectangle info of [start] button
             if (isInside(getMousePos(tempcanvas,clickEvent),rect)){
               game1.showLvlSelectMenu = true;
-              console.log("The start button finally works");
+              console.debug("The start button finally works");
             }
           }
           else{ //if not else then it instantly puts u in a level because of position overlapping
@@ -270,9 +321,11 @@ function loadGame() {
             if(game1.showMainMenu && game1.showLvlSelectMenu){
               var rect = {x:game1.width/10,y:game1.height/10,width:(game1.width/10)*8,height:(game1.height/10)*8}; //The big hitbox for the level info and stuff
               if (isInside(getMousePos(tempcanvas,clickEvent),rect)){
-                game1.showLvlSelectMenu = false;
-                game1.showMainMenu = false;
-                game1.paused = false;
+                if (game1.loadLevelId(game1.mainLvl)){
+                  game1.showLvlSelectMenu = false;
+                  game1.showMainMenu = false;
+                  game1.paused = false;
+                }
               }
               var rect = {x:0,y:0,width:game1.width/15,height:game1.width/15}; //the back button
               if (isInside(getMousePos(tempcanvas,clickEvent),rect)){
@@ -305,13 +358,13 @@ function loadGame() {
       
       */
       tempcanvas.addEventListener('mousedown',function(){
-        console.log("holding");
+        console.debug("holding");
         if(!game1.keys.includes("clicking")){
           game1.keys.push("clicking");
         }
       });
       tempcanvas.addEventListener('mouseup',function(){
-        console.log("not holding");
+        console.debug("not holding");
         if (game1.keys.indexOf("clicking") > -1) {
           game1.keys.splice(game1.keys.indexOf("clicking"), 1); //remove 1 element from the index of the key event key
         }
@@ -331,41 +384,128 @@ function loadGame() {
     // the portals, pads, that stuff
   }
 
-  class Structures {
-    //basicaly ground but more
-    constructor(game,y,width,height,type) {
+  class squareStructureHitbox{
+    constructor(game,y,scale){
       this.game = game;
-      this.width = width;
-      this.height = type;
-      this.speedX = this.game.speedX; // set movement speed to the game movement speed (i realize this might be annoying to change later tho)
-      this.markedForDeleation = false; // by default plz do not kill ur self
-      this.x = this.game.width; //right of the screen
+      this.x = this.game.width;
       this.y = y;
+      this.scale = scale;
+      this.markedForDeletion = false;
+      this.side = (this.game.width/30)*scale;
+      let tempObst = new squareStructureDeathHitbox(this.game,this.y+this.side/2,1);
+      this.game.levelObjects.push(tempObst);
     }
-
-    update() {
-      this.x += this.speedX;
-      if (this.x + this.width < 5) {
-        //if off screen die
-        this.markedForDeleation = true;
+    
+    isTouchingPlr(){
+      return (isColiding({ x: this.x, y: this.y, width: this.side, height: this.side }, { x: this.game.player.x, y: this.game.player.y, width: this.game.player.width, height: this.game.player.height }));
+    }
+    
+    update(){
+      if (this.x<0-this.side){
+        this.markedForDeletion = true;
       }
-    }
-
-    draw(context) {
-      context.fillStyle = "#000000";
-      context.fillRect(this.x, this.y, this.width, this.height);
-    }
-  }
-  class Square extends Structures {
-    constructor(game,y,w,h) {
-      this.width = w;
-      this.height = h;
-      this.type = "square";
-      this.y = y;
-      super(game,this.y,this.width,this.height,this.type);
+      this.x-=this.game.speedX;
+      
+      //FUN COLISION TEST THING:
+      if(isColiding({ x: this.x, y: this.y, width: this.side, height: this.side }, { x: this.game.player.x, y: this.game.player.y, width: this.game.player.width, height: this.game.player.height })){
+        this.game.player.squareColisionCheck(this);
+      }
       
     }
+    draw(context){
+      context.fillStyle = "#0000FF77";
+      context.fillRect(this.x,this.y,this.side,this.side);
+    }
+    
   }
+  
+  class deathHitbox{
+    constructor(game,y,w,h){
+      this.game = game;
+      this.x = this.game.width;
+      this.y = y;
+      this.markedForDeletion = false;
+      this.width = w;
+      this.height=h;
+    }
+    
+    isTouchingPlr(){
+      return (isColiding({ x: this.x, y: this.y, width: this.width, height: this.height }, { x: this.game.player.x, y: this.game.player.y, width: this.game.player.width, height: this.game.player.height }));
+    }
+    
+    update(){
+      if (this.x<0-this.side){
+        this.markedForDeletion = true;
+      }
+      this.x-=this.game.speedX;
+      
+      //FUN COLISION TEST THING:
+      if(isColiding({ x: this.x, y: this.y, width: this.width, height: this.height }, { x: this.game.player.x, y: this.game.player.y, width: this.game.player.width, height: this.game.player.height })){
+        this.game.player.deathSequence();
+      }
+      
+    }
+    draw(context){
+      context.fillStyle = "#FF0000";
+      context.fillRect(this.x,this.y,this.width,this.height);
+    }
+    
+  }
+  
+  class squareStructureDeathHitbox{
+    constructor(game,y,scale){
+      this.game = game;
+      this.x = this.game.width;
+      this.y = y;
+      this.scale = scale;
+      this.markedForDeletion = false;
+      this.width = (this.game.width/30)*scale;
+      this.height=(this.game.height/100)*scale;
+    }
+    
+    isTouchingPlr(){
+      return (isColiding({ x: this.x, y: this.y, width: this.width, height: this.height }, { x: this.game.player.x, y: this.game.player.y, width: this.game.player.width, height: this.game.player.height }));
+    }
+    
+    update(){
+      if (this.x<0-this.side){
+        this.markedForDeletion = true;
+      }
+      this.x-=this.game.speedX;
+      
+      //FUN COLISION TEST THING:
+      if(isColiding({ x: this.x, y: this.y, width: this.width, height: this.height }, { x: this.game.player.x, y: this.game.player.y, width: this.game.player.width, height: this.game.player.height })){
+        this.game.player.deathSequence();
+      }
+      
+    }
+    draw(context){
+      context.fillStyle = "#FF0000";
+      context.fillRect(this.x,this.y,this.width,this.height);
+    }
+    
+  }
+  
+  class obsticalTest {
+    constructor(game){
+      this.game = game;
+      this.x = this.game.width;
+      this.y=this.game.height/2;
+      this.width=20;
+      this.height=20;
+      this.markedForDeletion = false;
+    }
+    update(){
+    if (this.x<0-this.width){
+        this.markedForDeletion = true;
+      }
+      this.x-=this.game.speedX;
+    }
+    draw(ctx){
+      ctx.fillStyle="#000000";
+      ctx.fillRect(this.x,this.y,this.width,this.height);
+    }
+ }
 
   
   /*
@@ -382,21 +522,31 @@ function loadGame() {
       //Setup / init
       this.game = game; //game arg
       
+      this.deathForgivenessFrame=0;
+      this.canDie=false;
+      
+      this.structureCol = 0;
+      this.structureHitboxColision=false;
+      
+      this.jumping=false;
+      
+      this.touchingGroundFix=0;
+      
       this.floorEnabled = true;
       this.ceilingEnabled = true;
       
       this.canUFOClick = true; //so that you need to click twice
       
-      this.reset = false;
-      this.yStart = this.game.height/2;
-      
       this.width = this.game.width/30; //width
       this.height = this.game.width/30; //height
 
+      this.reset = false;
+      this.yStart = this.game.height-this.height;
+      
       this.x = this.game.width/5; //x pos
       this.y = this.yStart; //y pos
 
-      this.gameMode = "ship"; //game modes : "cube" "ship" "ball" "ufo" wave" "robot" "spider" "swing"
+      this.gameMode = "cube"; //game modes : "cube" "ship" "ball" "ufo" wave" "robot" "spider" "swing"
       this.isMini = false; // if it is mini gm
       
       //SETUP GM vars:
@@ -413,25 +563,104 @@ function loadGame() {
       this.robotBoostStrength = -1.3;
       this.canSpiderClick = true;
       this.canSwingClick = true;
-      
+      this.dead=false;
       
     }
-
+    
+    squareColisionCheck(squareElement){
+      this.structureCol++;
+      console.debug(getVerticalOverlap(this.y,this.height,squareElement.y,squareElement.side));
+        if ((this.y+this.height)<(squareElement.y+squareElement.side)){
+          this.y -= getVerticalOverlap(this.y,this.height,squareElement.y,squareElement.side);
+          if (this.gravityDir == 1){this.touchingGroundFix++;}
+        }
+        else{
+          this.y += getVerticalOverlap(this.y,this.height,squareElement.y,squareElement.side);
+          if (this.gravityDir == -1){this.touchingGroundFix++;}
+        }
+      if ((this.yvel>0&&this.gravityDir==1)||(this.yvel<0&&this.gravityDir==-1)){
+        this.yvel=0;
+      }
+/*
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!NEED TO FIX HITBOXES STILL CLIPPING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*/
+      
+      
+            if (this.y > this.game.height-this.height || this.y == this.game.height-this.height){
+              if (this.gravityDir == 1){}
+              if (this.y>this.game.height-this.height){
+                if (this.y>this.game.height-this.height/2){
+                  console.log("died");
+                  this.deathSequence();
+                }
+              }
+      }
+            if (this.y < 0 || this.y == 0){
+              if (this.gravityDir == -1){}
+              if (this.y<0){
+                if (this.y<(this.height/-2)){
+                  this.deathSequence();
+                }
+              }
+              
+              
+            }
+      }
+      
+    
+    deathSequence(){
+      if (!this.canDie){this.deathForgivenessFrame++;}else{
+        this.dead=true;
+        this.game.paused=true;
+        this.game.level.pause();
+        setTimeout(()=>{
+          
+          this.reset=true;
+          this.game.paused=false;
+          this.dead=false;
+          this.game.frameX=0;
+          this.game.levelObjects = [];
+          this.game.level.reset();
+        },250);//PLR DEATH TIME = 1/4 sec
+      }
+    }
+    
     update() {
       //player tick
+      
+      if (this.structureCol>0){
+        this.structureHitboxColision=true;
+      }
+      else{
+        this.structureHitboxColision=false;
+      }
+      this.structureCol=0;
       
       if(this.reset){
         //Reset vars
         this.y = this.yStart;
         this.yvel = 0;
         this.touchingGround=false;
+        this.touchingGroundFix=0;
         this.game.frameX = 0;
         this.gravityDir = 1;
         
         this.reset=false;
       }
 
-      console.log(
+      console.debug(
         `Current Player GM: ${this.gameMode} \n is mini: ${this.isMini}`
       );
       
@@ -526,28 +755,39 @@ function loadGame() {
       //Floor:
       if (this.floorEnabled && this.gravityDir == 1){
             if (this.y > this.game.height-this.height || this.y == this.game.height-this.height){
-              if (this.gravityDir == 1){this.touchingGround = true;}
-              if (this.y>this.game.height-this.height){this.yvel = 0;this.y = this.game.height-this.height;}
+              if (this.gravityDir == 1){this.touchingGroundFix++;}
+              if (this.y>this.game.height-this.height){
+                // if (this.y>this.game.height-this.height/2){
+                //   console.log("died");
+                //   this.deathSequence();
+                // }
+                this.yvel = 0;this.y = this.game.height-this.height;
+              }
               
               
             }
             else{
               if(this.gravityDir ==1){
-                this.touchingGround = false;
+                this.touchingGroundFix+=0;
               }
             }
       }
       //Ceiling
       if (this.ceilingEnabled){
             if (this.y < 0 || this.y == 0){
-              if (this.gravityDir == -1){this.touchingGround = true;}
-              if (this.y<0){this.yvel = 0;this.y = 0;}
+              if (this.gravityDir == -1){this.touchingGroundFix++;}
+              if (this.y<0){
+                // if (this.y<(this.height/-2)){
+                //   this.deathSequence();
+                // }
+                this.yvel = 0;this.y = 0;
+              }
               
               
             }
             else{
               if(this.gravityDir ==-1){
-                this.touchingGround = false;
+                this.touchingGroundFix+=0;
               }
             }
       }
@@ -556,7 +796,21 @@ function loadGame() {
         this.robotCharge = 0;
       }
       
-        this.y += this.yvel;
+      if(this.touchingGroundFix>0){
+        this.touchingGround=true;
+      }
+      else{this.touchingGround=false;}
+      this.touchingGroundFix=0;
+      
+      if (this.deathForgivenessFrame>0){
+        this.canDie=true;
+      }
+      else{
+        this.canDie=false;
+      }
+      this.deathForgivenessFrame=0;
+      
+      this.y += this.yvel;
       
       
       /*
@@ -620,10 +874,10 @@ function loadGame() {
     
     draw(context) {
       // draw frame
-      context.fillStyle = "#F00";
+      context.fillStyle = "#000"; //PLAYER DRAW THING HERE
       context.fillRect(this.x, this.y, this.width, this.height); //fillRect([X position],[Y position],[Width],[Height])
     }
-  }
+ } 
 
   class Obsticles {
     //Player murderers
@@ -662,6 +916,7 @@ function loadGame() {
     }
 
     update() {
+      if(!this.game.player.dead){
       if (
         this.game.keys.includes(this.pauseKey) &&
         !this.noDoublePause &&
@@ -670,8 +925,10 @@ function loadGame() {
         this.noDoublePause = true;
         if (game.paused) {
           this.game.paused = false;
+          this.game.level.resume();
         } else {
           this.game.paused = true;
+          this.game.level.pause();
         }
       }
       
@@ -680,6 +937,7 @@ function loadGame() {
       }
       
       if(this.game.paused && this.game.keys.includes(this.menuKey)){this.game.showMainMenu = true;this.game.showLvlSelectMenu = true;this.game.player.reset = true;}
+    }
     }
 
     draw(context) {
@@ -746,12 +1004,155 @@ function loadGame() {
       
     }
   }
+  
+  
+  class LevelHandler{
+    constructor(game){
+      this.game = game;
+      this.isLoading = true;
+      this.isLevelLoaded=false;
+    }
+    
+    setupLevel (){
+      this.isLoading = true;
+      try{
+        if(!audioElements[this.game.loadedLevel["song"]["jsonName"]]){
+          loadLvlAudio(this.game.loadedLevel["song"]["url"],true,false,this.game.loadedLevel["song"]["elementId"],this.game.loadedLevel["song"]["jsonName"]);
+        }
+      }
+      catch(e){
+        console.error(`Couldn't load audio element. error:\n${e}`);
+      }
+      try{
+        playAudio(audioElements[this.game.loadedLevel["song"]["jsonName"]],0,false);
+      }
+      catch(e){
+        console.error(`Couldn't play audio, error:\n${e}`);
+      }
+      try{
+        this.reset();
+      }
+      catch(e){
+        console.error(`it was worth a shot, \n ${e}`);
+      }
+      this.isLoading=false;
+    }
+    
+    pause(){
+      try{
+      pauseAudio(audioElements[this.game.loadedLevel["song"]["jsonName"]]);
+      }
+      catch(e){
+        console.error(`something happened, u fix it tho not me \n ${e}`);
+      }
+    }
+    
+    resume(){
+      try{
+      playAudio(audioElements[this.game.loadedLevel["song"]["jsonName"]],document.getElementById(audioElements[this.game.loadedLevel["song"]["jsonName"]]).currentTime,false);
+      }
+      catch(e){
+        console.error(`"I dont wanna\n${e}"`);
+      }
+    }
+    
+    reset(){
+      playAudio(audioElements[this.game.loadedLevel["song"]["jsonName"]],0,false);
+    }
+    
+    update(){
+      // if (this.game.frameX % 15 === 0){
+      //   let tempObst = new deathHitbox(this.game,/*Math.floor(Math.random()*this.game.height)*//*Math.floor(Math.random()*this.game.height)*/this.game.height-50,this.game.width/50,this.game.width/50);
+      //   this.game.levelObjects.push(tempObst);
+      // }
+      
+      if (this.game.loadedLevel&&this.game.loadedLevel["obsticles"]) {
+        for (var i=0; i<this.game.loadedLevel["obsticles"].length;i++){
+          console.debug(this.game.loadedLevel["obsticles"][i]);
+          try{
+            if (this.game.loadedLevel["obsticles"][i]["frame"]==this.game.frameX){
+              let tempObst = new deathHitbox(this.game,this.game.loadedLevel["obsticles"][i]["y"],this.game.loadedLevel["obsticles"][i]["w"],this.game.loadedLevel["obsticles"][i]["h"]);
+              this.game.levelObjects.push(tempObst);
+            }
+          }
+          catch(e){
+            console.error(`Error in placing object type="obsticle" \nerror:\n${e}`);
+          }
+        }
+      }
+      else{
+        console.log("no loaded level");
+      }
+      
+      if (this.game.loadedLevel&&this.game.loadedLevel["squares"]) {
+        for (var i=0; i<this.game.loadedLevel["squares"].length;i++){
+          console.debug(this.game.loadedLevel["squares"][i]);
+          try{
+            if (this.game.loadedLevel["squares"][i]["frame"]==this.game.frameX){
+              let tempObst = new squareStructureHitbox(this.game,this.game.loadedLevel["squares"][i]["y"],this.game.loadedLevel["squares"][i]["scale"]);
+              this.game.levelObjects.push(tempObst);
+            }
+          }
+          catch(e){
+            console.error(`Error in event \nerror:\n${e}`);
+          }
+        }
+      }
+      else{
+        console.log("no loaded level");
+      }
+      
+      if (this.game.loadedLevel&&this.game.loadedLevel["events"]) {
+        for (var i=0; i<this.game.loadedLevel["events"].length;i++){
+          console.debug(this.game.loadedLevel["events"][i]);
+          try{
+            if (this.game.loadedLevel["events"][i]["frame"]==this.game.frameX){
+              if (this.game.loadedLevel["events"][i]["type"]=="gameMode"){
+                this.game.player.gameMode = this.game.loadedLevel["events"][i]["value"];
+              }
+              else{
+                if (this.game.loadedLevel["events"][i]["type"]=="speed"){
+                this.game.speedX = this.game.loadedLevel["events"][i]["value"];
+              }
+              }
+            }
+          }
+          catch(e){
+            console.error(`Error in event \nerror:\n${e}`);
+          }
+        }
+      }
+      else{
+        console.log("no loaded level");
+      }
+      
+      
+      for (var i = 0;i<this.game.levelObjects.length;i++){
+        this.game.levelObjects[i].update();
+        if (this.game.levelObjects[i].markedForDeletion) {
+          this.game.levelObjects.splice(i, 1);
+          i--;
+        }
+      }
+    }
+    draw(context){
+      for (var i = 0;i<this.game.levelObjects.length;i++){
+        this.game.levelObjects[i].draw(context);
+      }
+    }
+  }
 
   class Game {
     // game logic
     constructor(width, height) {
       
+      // newWindowInfo = null;
+      
+      this.loadedLevel = {};
+      
       this.keys = [];
+      
+      this.levelObjects = [];
       
       this.frameX = 0;
       
@@ -766,8 +1167,12 @@ function loadGame() {
 
       this.width = width; //get width
       this.height = height; // get height
+      
+      this.loadingLevel = false;
 
       this.player = new Player(this); //setup player with this b/c this is the game
+      
+      this.level = new LevelHandler(this);//Mainly logic for level
       
       this.pauseScreen = new PauseScreen(this); // UI
 
@@ -776,18 +1181,73 @@ function loadGame() {
       this.LevelSelectMenu = new LevelSelectMenu(this); // UI
 
       this.inputs = new InputHandler(this); //setup input handler
+      
+      
+      
+      this.loadLevel("levelTest2.json");
+      
+      
     }
-
+    
+    loadLevelId(id){
+      if (id==1){
+        this.loadLevel("levelTest2.json");
+        return true;
+      }
+      else{
+        alert("notFinished")
+        return false;
+      }
+    }
+    
+    async loadLevel(jsonURL){
+      this.loadingLevel = true;
+      try {
+        this.loadedLevel = await getJSONFromURL(jsonURL);
+        debugVar1 = this.loadedLevel;
+      }
+      catch(e){
+        console.error(`Failed to load level, error:\n${e}`);
+      }
+      this.loadingLevel = false;
+    }
+    
     update(context) {
       
       if (!this.paused) {
-        this.player.update(); //run player update tick
+        if (this.level.isLevelLoaded){
+        if (!this.level.isLoading){
+          this.level.update();
+        
+          this.player.update(); //run player update tick
+          this.frameX++;
+        }
+        
+        }
+        else{
+          this.level.setupLevel();
+          this.level.isLevelLoaded=true;
+        }
       }
+      else{
+        
+      }
+      
+      
       
       this.pauseScreen.update(); //check pause
       
+      if(this.player.dead){
+        this.level.isLevelLoaded=false;
+      }
+      
       if(this.showMainMenu){
+        this.level.isLevelLoaded=false;
+        this.isLevelLoaded=false;
+        this.levelObjects = [];
+        // this.loadedLevel = {};
         if(!menuMusicPlaying){
+          prevAudioElementId = audioElements.MenuMusic;
           playAudio(audioElements.MenuMusic,0,true);
           menuMusicPlaying = true;
         }
@@ -809,30 +1269,93 @@ function loadGame() {
           if (devScreenData.hasOwnProperty("gravity")){
             this.player.gravityDir = devScreenData["gravity"];
           }
+          if (devScreenData.hasOwnProperty("showDebug")){
+            showDebug = devScreenData["showDebug"];
+          }
           devScreenData = null;
         }
       }
+      
+      
       
       
     }
 
     draw(context) {
       this.player.draw(context); //have plr draw its self
+      this.level.draw(context);
       if (this.paused) {
         if (this.showMainMenu) {
           this.mainMenu.draw(context);
           if (this.showLvlSelectMenu){
             this.LevelSelectMenu.draw(context);
           }
-          this.frameX=0;
+          
         } else {
-          this.pauseScreen.draw(context);
+          if (!this.player.dead){
+            this.pauseScreen.draw(context);
+          }
+          else{
+            if (showDebug){
+              context.fillStyle="#FF0000";
+              context.font = "48px serif";
+              context.fillText("DEAD",this.width/2,this.height/2);
+            }
+          }
         }
       }
-      else{this.frameX=0;}
+      else{
+        
+      }
       
-      
+      if (showDebug){
+        context.font = "24px serif";
+        context.fillStyle="#FF0000";
+        context.fillText("keys: "+this.keys,0,24*1);
+        context.fillText("levelObjects: "+this.levelObjects,0,24*2);
+        context.fillText("frameX: "+this.frameX,0,24*3);
+        context.fillText("speedX: "+this.speedX,0,24*4);
+        context.fillText("mainLvlId: "+this.mainLvl+"/"+this.numOfLvls,0,24*5);
+        context.fillText("paused: "+this.paused,0,24*6);
+        context.fillText("showMainMenu: "+this.showMainMenu,0,24*7);
+        context.fillText("showLvlSelectMenu: "+this.showLvlSelectMenu,0,24*8);
+        context.fillText("width: "+this.width,0,24*9);
+        context.fillText("height: "+this.height,0,24*10);
+        context.fillText("floorEnabled: "+this.player.floorEnabled,0,24*11);
+        context.fillText("ceilingEnabled: "+this.player.ceilingEnabled,0,24*12);
+        context.fillText("canUFOClick: "+this.player.canUFOClick,0,24*13);
+        context.fillText("Reset?: "+this.player.reset,0,24*14);
+        context.fillText("yStart: "+this.player.yStart,0,24*15);
+        context.fillText("player width: "+this.player.width,0,24*16);
+        context.fillText("player height: "+this.player.height,0,24*17);
+        context.fillText("player x: "+this.player.x,0,24*18);
+        context.fillText("player y: "+this.player.y,0,24*19);
+        context.fillText("gameMode: "+this.player.gameMode,0,24*20);
+        context.fillText("isMini: "+this.player.isMini,0,24*21);
+        context.fillText("gravity: "+this.player.gravity,0,24*22);
+        context.fillText("cubeJumpStrength: "+this.player.cubeJumpStrength,0,24*23);
+        context.fillText("yvel: "+this.player.yvel,0,24*24);
+        context.fillText("touchingGround: "+this.player.touchingGround,0,24*25);
+        context.fillText("lift: "+this.player.lift,0,24*26);
+        context.fillText("gravityDir: "+this.player.gravityDir,0,24*27);
+        context.fillText("ufoJumpForce: "+this.player.ufoJumpForce,0,24*28);
+        context.fillText("waveSpeed: "+this.player.waveSpeed,0,24*29);
+        context.fillText("robotCharge: "+this.player.robotCharge+"/"+this.player.maxRobotCharge,0,24*30);
+        context.fillText("robotBoostStrength: "+this.player.robotBoostStrength,0,24*31);
+        context.fillText("canSpiderClick: "+this.player.canSpiderClick,0,24*32);
+        context.fillText("canSwingClick: "+this.player.canSwingClick,0,24*33);
+        context.fillText("loadedLevel: "+this.player.loadedLevel,0,24*34);
+        
+      }
       if (prevMusicVolume != musicVolume){prevMusicVolume = musicVolume; document.getElementById(currentLevelAudioElement).volume = musicVolume/100;}
+      
+      // if (newWindowInfo != null){
+      //   alert(newWindowInfo.width+" "+newWindowInfo.height);
+      //   this.width = newWindowInfo.width;
+      //   this.height = newWindowInfo.height;
+      //   newWindowInfo = null;
+      // }
+      
     }
   }
 
